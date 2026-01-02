@@ -1,12 +1,12 @@
 # 🎟️ EventGate - Access Control & Ticketing System
 
 A full-stack solution for event management that handles the entire flow: from **ticket issuance** (QR Code generation) to **access control** (Turnstile validation).
-Built to demonstrate real-time data synchronization between ticket office and entry gates.
+Built to demonstrate real-time data synchronization between ticket office and entry gates with persistent data storage.
 
 ![Status](https://img.shields.io/badge/Status-MVP-green)
 ![Tech](https://img.shields.io/badge/Backend-FastAPI-green)
 ![Tech](https://img.shields.io/badge/Frontend-TailwindCSS-blue)
-![Module](https://img.shields.io/badge/Module-QRCode-lightgrey)
+![Database](https://img.shields.io/badge/Data-SQLite-orange)
 
 ## 🚀 Key Features
 
@@ -20,11 +20,22 @@ Built to demonstrate real-time data synchronization between ticket office and en
 * **Anti-Passback Logic:** Prevents the same ticket from being used twice (fraud prevention).
 * **Real-time Analytics:** Live dashboard monitoring attendance count vs total capacity.
 
+### 💾 Data Persistence
+* **SQLite Integration:** All data (tickets, check-in status, logs) is saved to a local SQL database (`eventi.db`).
+* **Reliability:** System state is preserved even after server restarts or crashes.
+
 ## 🛠️ Tech Stack
 
 * **Backend:** Python 3.10+, FastAPI, Pydantic, Python-QRCode (Pillow).
 * **Frontend:** HTML5, Vanilla JS, Tailwind CSS.
-* **Data:** In-Memory Storage (simulating a shared database).
+* **Data:** SQLite (Persistent relational database).
+
+## 🤖 AI-Assisted Development
+
+This project was developed using an **AI-First approach**, simulating a Senior/Junior pair programming environment.
+
+* **Role of AI:** Acted as a Technical Lead/Mentor, providing architectural decisions, debugging strategies (e.g., solving database locking issues), and guiding the transition from a volatile memory prototype to a persistent database application.
+* **Implementation:** The code was implemented to follow modern Clean Code practices and RESTful API standards.
 
 ## ⚡ Quick Start
 
@@ -54,15 +65,16 @@ To run the system locally:
 This project simulates two different physical locations:
 
 1.  **Open the Ticket Office:**
-    Open `biglietteria.html` in your browser.
-    * Enter a name (e.g., `VIP-GUEST`) and click **Generate**.
+    Open `shop.html` in your browser.
+    * Enter a name (e.g., `Samuele Fabi`) and click **Generate**.
     * A QR Code will appear.
 
 2.  **Open the Turnstile:**
     Open `index.html` in your browser.
-    * Enter the code you just created (`VIP-GUEST`).
+    * Enter the code you just created (`Samuele Fabi`).
     * You will see **ACCESS GRANTED**.
     * Try entering it again to test the **Anti-Passback** (Access Denied).
+    * Restart the server (`CTRL+C` -> `uvicorn...`) and try again: the data will still be there!
 
 ---
 *Developed as a Proof of Concept for event management workflows.*

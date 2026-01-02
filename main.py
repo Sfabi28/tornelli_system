@@ -1,15 +1,15 @@
-from fastapi import FastAPI #libreria per API
-from pydantic import BaseModel #libreria per validazione dati
-from fastapi.middleware.cors import CORSMiddleware #libreria per CORS
-from typing import Optional #libreria per tipi opzionali (nome None)
-from io import BytesIO #libreria per gestione byte stream
-import qrcode #libreria per generazione QR code
-from fastapi.responses import StreamingResponse #libreria per risposte in streaming
+from fastapi import FastAPI
+from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
+from typing import Optional
+from io import BytesIO
+import qrcode
+from fastapi.responses import StreamingResponse
+import sqlite3
 
-app = FastAPI() #creazione istanza FastAPI
+app = FastAPI()
 
-
-app.add_middleware( #middleware per CORS permette di fare richieste da qualsiasi origine
+app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"], 
     allow_credentials=True,
@@ -17,71 +17,104 @@ app.add_middleware( #middleware per CORS permette di fare richieste da qualsiasi
     allow_headers=["*"],
 )
 
-database_tickets = { #simulazione database
-    "CODE123": {"name": "Mario Rossi", "checked_in": False},
-    "CODE456": {"name": "Luigi Verdi", "checked_in": True},
-    "CODE789": {"name": "Anna Bianchi", "checked_in": False},
-}
+def init_db():
+    conn = sqlite3.connect("eventi.db")
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS tickets (
+            code TEXT PRIMARY KEY,
+            name TEXT,
+            checked_in INTEGER DEFAULT 0
+        )
+    """)
+    conn.commit()
+    conn.close()
 
-class AccessResponse(BaseModel): #modello di risposta, ogni return avra questi campi
+init_db()
+
+
+class AccessResponse(BaseModel):
     result: str
     message: str
     user_name: Optional[str] = None
 
-class StatsResponse(BaseModel): #modello di risposta, ogni return avra questi campi
+class StatsResponse(BaseModel):
     total: int
     checkedIn: int
 
-@app.post("/check-access/{ticket_code}", response_model=AccessResponse) #endpoint POST per controllo accesso
 
-def check_access(ticket_code: str): #funzione che gestisce la richiesta di entrata
+@app.post("/check-access/{ticket_code}", response_model=AccessResponse)
+def check_access(ticket_code: str):
     
-    guest = database_tickets.get(ticket_code) #ricerca codice nel "database"
+    conn = sqlite3.connect("eventi.db")
+    cursor = conn.cursor()
 
-    if not guest:
+    res = cursor.execute("SELECT name, checked_in FROM tickets WHERE code = ?", (ticket_code,))
+    data = res.fetchone()
+
+    if data is None:
+        conn.close()
         return AccessResponse(
             result="DENIED",
-            message="Invalid code"
+            message="CODICE NON TROVATO"
         )
+    
+    nome_ospite = data[0]
+    stato_ingresso = data[1]
 
-    if guest["checked_in"]:
+    if stato_ingresso == 1:
+        conn.close()
         return AccessResponse(
             result="DENIED",
-            message="TICKET ALREADY USED",
-            user_name=guest["name"]
+            message="BIGLIETTO GIÀ UTILIZZATO",
+            user_name=nome_ospite
         )
 
-    guest["checked_in"] = True
-    
+    cursor.execute("UPDATE tickets SET checked_in = 1 WHERE code = ?", (ticket_code,))
+    conn.commit()
+    conn.close()
+
     return AccessResponse(
         result="OK",
-        message="WELCOME",
-        user_name=guest["name"]
+        message="BENVENUTO",
+        user_name=nome_ospite
     )
+
 
 @app.get("/stats", response_model=StatsResponse)
 def get_stats():
+    conn = sqlite3.connect("eventi.db")
+    cursor = conn.cursor()
 
-    total_tickets = len(database_tickets)
+    total = cursor.execute("SELECT COUNT(*) FROM tickets").fetchone()[0]
 
-    entered_count = sum(1 for guest in database_tickets.values() if guest["checked_in"])
-    
+    entered_count = cursor.execute("SELECT COUNT(*) FROM tickets WHERE checked_in = 1").fetchone()[0]
+
+    conn.close()
+
     return StatsResponse(
-        total=total_tickets,
+        total=total,
         checkedIn=entered_count
     )
 
 @app.get("/generate-qr")
 def generate_qr(qr_code: str):
-    database_tickets[qr_code] = {"name": "Nuovo Ospite", "checked_in": False}
-
+    
+    try:
+        conn = sqlite3.connect("eventi.db")
+        cursor = conn.cursor()
+        
+        cursor.execute("INSERT INTO tickets (code, name, checked_in) VALUES (?, ?, 0)", (qr_code, qr_code))
+        
+        conn.commit()
+        conn.close()
+    
+    except sqlite3.IntegrityError:
+        print(f"Attenzione: Il codice {qr_code} esisteva già nel database.")
+    
     img = qrcode.make(qr_code)
-
     buffer = BytesIO()
     img.save(buffer)
-
     buffer.seek(0)
 
     return StreamingResponse(buffer, media_type="image/png")
-    
-    
