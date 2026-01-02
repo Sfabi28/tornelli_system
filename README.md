@@ -1,50 +1,51 @@
 # 🎟️ Event Access Control System
 
-Sistema di controllo accessi ad alte prestazioni per eventi, fiere e congressi.
-Progettato per gestire flussi veloci, prevenire frodi (anti-passback) e fornire statistiche in tempo reale.
+High-performance access control system designed for events, trade shows, and conferences.
+Built to handle fast attendee flows, prevent fraud (anti-passback), and provide real-time attendance statistics.
 
 ![Status](https://img.shields.io/badge/Status-Prototype-orange)
 ![Tech](https://img.shields.io/badge/Backend-FastAPI-green)
 ![Tech](https://img.shields.io/badge/Frontend-TailwindCSS-blue)
 
-## 🚀 Funzionalità Chiave
+## 🚀 Key Features
 
-* **Validazione Istantanea:** Risposte in <50ms tramite API REST.
-* **Anti-Passback:** Impedisce che lo stesso biglietto venga usato due volte (prevenzione frodi).
-* **Interfaccia Operatore:** UI ottimizzata per tablet e dispositivi touch ai varchi.
-* **Real-time Analytics:** (In sviluppo) Monitoraggio presenze e flussi in tempo reale.
+* **Instant Validation:** Sub-millisecond response times via REST API (<50ms).
+* **Anti-Passback Logic:** Prevents the same ticket from being used twice (fraud prevention).
+* **Operator Interface:** Responsive UI optimized for tablets and touch devices at gates.
+* **Real-time Analytics:** Live dashboard monitoring attendance count and capacity.
 
-## 🛠️ Tecnologie Utilizzate
+## 🛠️ Tech Stack
 
-* **Backend:** Python 3.10+, FastAPI (per performance asincrone).
-* **Frontend:** HTML5, Vanilla JS, Tailwind CSS (per UI responsive senza build tools pesanti).
-* **Data:** In-Memory Storage (facilmente scalabile a Redis/PostgreSQL).
+* **Backend:** Python 3.10+, FastAPI (for asynchronous high performance).
+* **Frontend:** HTML5, Vanilla JS, Tailwind CSS (lightweight, no build tools required).
+* **Data:** In-Memory Storage (designed to be easily scalable to Redis or PostgreSQL).
 
 ## ⚡ Quick Start
 
-Se vuoi provare il tornello in locale:
+To run the system locally:
 
-1.  **Clona la repository**
+1.  **Clone the repository**
     ```bash
-    git clone [https://github.com/TuoUtente/tornelli-system.git](https://github.com/TuoUtente/tornelli-system.git)
+    git clone [https://github.com/YOUR_USERNAME/tornelli-system.git](https://github.com/YOUR_USERNAME/tornelli-system.git)
     cd tornelli-system
     ```
 
-2.  **Prepara l'ambiente**
+2.  **Setup the environment**
     ```bash
     python3 -m venv venv
-    source venv/bin/activate  # Su Windows: venv\Scripts\activate
+    source venv/bin/activate  # On Windows: venv\Scripts\activate
     pip install -r requirements.txt
     ```
 
-3.  **Avvia il Server**
+3.  **Start the Server**
     ```bash
     uvicorn main:app --reload
     ```
-    Il sistema sarà attivo su: `http://127.0.0.1:8000`
+    The system will be live at: `http://127.0.0.1:8000`
 
-## 🧪 Testare il sistema
-Puoi usare i seguenti codici demo:
-* `CODE123` -> Biglietto Valido (Mario Rossi)
-* `CODE456` -> Biglietto Già Usato (Luigi Verdi)
-* `CODE999` -> Biglietto Inesistente
+## 🧪 Testing the System
+You can use the following demo codes to test different scenarios:
+
+* `CODE123` -> **Valid Ticket** (Mario Rossi) - *Returns Green/Access Granted*
+* `CODE456` -> **Already Used** (Luigi Verdi) - *Returns Red/Access Denied (Anti-passback)*
+* `CODE999` -> **Invalid Ticket** - *Returns Red/Access Denied*
