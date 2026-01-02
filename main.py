@@ -14,7 +14,6 @@ app.add_middleware( #middleware per CORS permette di fare richieste da qualsiasi
     allow_headers=["*"],
 )
 
-
 database_tickets = { #simulazione database
     "CODE123": {"name": "Mario Rossi", "checked_in": False},
     "CODE456": {"name": "Luigi Verdi", "checked_in": True},
@@ -26,9 +25,13 @@ class AccessResponse(BaseModel): #modello di risposta, ogni return avra questi c
     message: str
     user_name: Optional[str] = None
 
+class StatsResponse(BaseModel): #modello di risposta, ogni return avra questi campi
+    total: int
+    checkedIn: int
+
 @app.post("/check-access/{ticket_code}", response_model=AccessResponse) #endpoint POST per controllo accesso
 
-def check_access(ticket_code: str): #funzione che gestisce la richiesta
+def check_access(ticket_code: str): #funzione che gestisce la richiesta di entrata
     
     guest = database_tickets.get(ticket_code) #ricerca codice nel "database"
 
@@ -52,3 +55,16 @@ def check_access(ticket_code: str): #funzione che gestisce la richiesta
         message="WELCOME",
         user_name=guest["name"]
     )
+
+@app.get("/stats", response_model=StatsResponse)
+def get_stats():
+
+    total_tickets = len(database_tickets)
+
+    entered_count = sum(1 for guest in database_tickets.values() if guest["checked_in"])
+    
+    return StatsResponse(
+        total=total_tickets,
+        checkedIn=entered_count
+    )
+    
