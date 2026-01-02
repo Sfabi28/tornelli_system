@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emissione Biglietti</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 h-screen flex flex-col items-center justify-center font-sans text-white">
+
+    <div class="bg-slate-800 p-8 rounded-2xl shadow-2xl w-96 text-center border border-slate-700">
+        
+        <h1 class="text-3xl font-black mb-2 text-emerald-400">BIGLIETTERIA</h1>
+        <p class="text-slate-400 text-sm mb-8">Genera il tuo pass istantaneo</p>
+        
+        <div class="text-left mb-4">
+            <label class="text-xs text-emerald-500 font-bold uppercase tracking-wider ml-1">Codice / Nome</label>
+            <input type="text" id="inputCodice" placeholder="Es. VIP-MARIO" 
+                   class="w-full mt-1 bg-slate-900 text-white p-4 rounded-xl border-2 border-slate-600 focus:border-emerald-500 focus:outline-none transition-colors font-bold text-lg placeholder-slate-600">
+        </div>
+
+        <button onclick="stampaBiglietto()" 
+                class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black py-4 rounded-xl transition-transform active:scale-95 shadow-lg shadow-emerald-500/20 mb-8">
+            STAMPA QR CODE
+        </button>
+
+        <div id="areaQr" class="hidden flex flex-col items-center bg-white p-4 rounded-xl">
+            <img id="immagineQr" src="" alt="QR Code" class="w-48 h-48 mix-blend-multiply">
+            <p class="text-slate-500 text-xs mt-2 font-bold">Mostra questo codice all'ingresso</p>
+        </div>
+
+    </div>
+
+    <script>
+        function stampaBiglietto() {
+
+            const codice = document.getElementById('inputCodice').value.trim();
+            
+            if (!codice) {
+                alert("Scrivi un codice per il biglietto!");
+                return;
+            }
+
+            const urlServer = `http://127.0.0.1:8000/generate-qr?qr_code=${codice}`;
+            
+            const imgTag = document.getElementById('immagineQr');
+            imgTag.src = urlServer;
+
+            document.getElementById('areaQr').classList.remove('hidden');
+        }
+    </script>
+
+</body>
+</html>

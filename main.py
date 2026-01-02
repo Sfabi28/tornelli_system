@@ -2,6 +2,9 @@ from fastapi import FastAPI #libreria per API
 from pydantic import BaseModel #libreria per validazione dati
 from fastapi.middleware.cors import CORSMiddleware #libreria per CORS
 from typing import Optional #libreria per tipi opzionali (nome None)
+from io import BytesIO #libreria per gestione byte stream
+import qrcode #libreria per generazione QR code
+from fastapi.responses import StreamingResponse #libreria per risposte in streaming
 
 app = FastAPI() #creazione istanza FastAPI
 
@@ -67,4 +70,18 @@ def get_stats():
         total=total_tickets,
         checkedIn=entered_count
     )
+
+@app.get("/generate-qr")
+def generate_qr(qr_code: str):
+    database_tickets[qr_code] = {"name": "Nuovo Ospite", "checked_in": False}
+
+    img = qrcode.make(qr_code)
+
+    buffer = BytesIO()
+    img.save(buffer)
+
+    buffer.seek(0)
+
+    return StreamingResponse(buffer, media_type="image/png")
+    
     
